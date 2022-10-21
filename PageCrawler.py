@@ -9,12 +9,17 @@ class PageCrawler:
         self.url = company["url"]
         self.urls_internal = set()
 
-
+    """career, careers, we-are-recruiting, we-are-hiring, job, jobs, open-positions, welcomekit, joinus, join-us, recruit"""
     def search_for_job(self):
 
         pass
 
+    def get_about_us(self, urls):
+        pass
+
     def map_website(self):
+        external_urls = set()
+        urls, external_urls = self.get_page_urls(self.url, external_urls)
         pass
 
     def get_page_urls(self, url, external_urls):
