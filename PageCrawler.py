@@ -42,7 +42,7 @@ class PageCrawler:
 
             self.urls_internal.add(href)
             urls.add(href)
-        return urls
+        return urls, external_urls
 
     def _check_is_valid_url(self, url):
         parse = urlparse(url)
