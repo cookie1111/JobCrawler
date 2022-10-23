@@ -43,7 +43,6 @@ class GrowJoAPI:
         usr.send_keys(self.usr)
         pwd = driver.find_element(By.ID, 'password')
         pwd.send_keys(self.pwd)
-
         pwd.send_keys(Keys.ENTER)
 
         auth = authorization = None
@@ -55,9 +54,6 @@ class GrowJoAPI:
                 auth = request.headers["auth"]
                 authorization = request.headers["authorization"]
 
-
-        #driver.close()
-        print(auth,authorization)
         return auth, authorization
 
     def set_country(self,country):
