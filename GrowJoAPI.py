@@ -2,6 +2,7 @@ import requests
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 import seleniumwire.webdriver as webdriver
+from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
@@ -30,28 +31,33 @@ class GrowJoAPI:
         options.add_experimental_option("excludeSwitches", ["enable-automation"])
         options.add_experimental_option('useAutomationExtension', False)
         options.add_argument("user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.0.0 Safari/537.36")
-        #options.add_argument("--headless")
+        options.add_argument("--headless")
 
         driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options,
                                   seleniumwire_options=wire_opt)
-        url = f'https://growjo.com/api/companies?order=desc&orderBy=employee_growth&offset=0&rowsPerPage=50&filter={{"industry":"AI","country":"Germany"}}'
+        url = f'https://growjo.com/login'
         driver.get(url)
-        #alert = WebDriverWait(driver, 5).until(EC.alert_is_present())
-        sleep(3)
-        alert = driver.switch_to.alert
-        alert.send_input(self.usr)
-        alert.send_input(Keys.TAB)
-        alert.send_input(self.pwd)
-        sleep(60)
-        alert.accept()
-        ret_id = None
+        usr = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "email"))
+        )
+        usr.send_keys(self.usr)
+        pwd = driver.find_element(By.ID, 'password')
+        pwd.send_keys(self.pwd)
+
+        pwd.send_keys(Keys.ENTER)
+
+        auth = authorization = None
+        sleep(1.1)
+        url = f'https://growjo.com/search'
+        driver.get(url)
         for request in driver.requests:
             if "auth" in request.headers:
                 auth = request.headers["auth"]
                 authorization = request.headers["authorization"]
-                break
+
 
         #driver.close()
+        print(auth,authorization)
         return auth, authorization
 
     def set_country(self,country):

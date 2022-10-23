@@ -2,7 +2,7 @@ from GrowJoAPI import GrowJoAPI
 from PageCrawler import PageCrawler
 from time import sleep
 
-TEST = 2
+TEST = 1
 
 with open("usr.txt",'r') as f:
     lines = f.read().splitlines()
@@ -14,7 +14,7 @@ grow_jo = GrowJoAPI(usr, pwd, log = True)
 
 
 
-# Press the green button in the gutter to run the script.
+
 if __name__ == '__main__':
     if TEST == 0:
     # crawler tests
@@ -59,7 +59,7 @@ if __name__ == '__main__':
         print(": ",grow_jo.get_companies())
 
     if TEST == 2:
-        #grow_jo._get_auth_and_authorization()
+        #grow_jo.get_companies()
         pass
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+
