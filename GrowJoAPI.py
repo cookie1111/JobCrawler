@@ -4,15 +4,19 @@ import requests
 
 class GrowJoAPI:
 
-    def __init__(self, auth, authorization, log = False, ):
+    def __init__(self, usr, pwd, log = False, ):
         self.country = "Germany"
         self.field = "AI"
         self.subfield = ""
         self.city = ""
         self.log = log
-        self.auth = auth
-        self.authorization = authorization
+        self.usr = usr
+        self.pwd = pwd
+        self.auth, self.authorization = self._get_auth_and_authorization()
 
+
+    def _get_auth_and_authorization(self):
+        return 1,1
 
     def set_country(self,country):
         self.country = country

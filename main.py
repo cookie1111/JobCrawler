@@ -3,9 +3,13 @@ from PageCrawler import PageCrawler
 from time import sleep
 
 
+with open("usr.txt",'r') as f:
+    lines = f.read().splitlines()
+    usr = lines[0]
+    pwd = lines[1]
 
 page_crawler = PageCrawler({"url" : "https://neuralink.com/"})
-grow_jo = GrowJoAPI(auth, authorization, log = True)
+grow_jo = GrowJoAPI(usr, pwd, log = True)
 
 
 
