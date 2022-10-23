@@ -45,6 +45,7 @@ class PageCrawler:
             self._check_external_urls(external_urls_new)
             external_urls = external_urls.union(external_urls_new)
             sleep(0.3)
+
         if len(self.potential_job_pages):
             print(self.url, ": no job page found!")
 
