@@ -1,26 +1,33 @@
 from GrowJoAPI import GrowJoAPI
 from PageCrawler import PageCrawler
 from time import sleep
+import pandas as pd
+from os.path import isfile
 
-TEST = 1
+TEST = -1
 
-with open("usr.txt",'r') as f:
+DF_FILE = "sites.pkl"
+
+with open("usr.txt", 'r') as f:
     lines = f.read().splitlines()
     usr = lines[0]
     pwd = lines[1]
 
-page_crawler = PageCrawler({"url" : "https://neuralink.com/"})
+#page_crawler = PageCrawler({"url" : "https://neuralink.com/"})
 grow_jo = GrowJoAPI(usr, pwd, log = True)
-
+if isfile(DF_FILE):
+    df = pd.read_pickle(DF_FILE)
+else:
+    df = pd.DataFrame(columns = ['Company_Name', 'URL', 'Career'])
 
 
 
 if __name__ == '__main__':
     if TEST == 0:
     # crawler tests
-        print(page_crawler.get_page_urls("https://neuralink.com/",set()))
-    #print(page_crawler.map_website())
-
+        pass
+        #print(page_crawler.get_page_urls("https://neuralink.com/",set()))
+        #print(page_crawler.map_website())
 
     if TEST == 1:
         # GrowJo tests
@@ -61,5 +68,14 @@ if __name__ == '__main__':
     if TEST == 2:
         #grow_jo.get_companies()
         pass
+
+    data = grow_jo.get_companies()
+
+    for company in data:
+        print(company["company_name"])
+        if not df['Company_Name'].str.contains(company['company_name']).any():
+            pc = PageCrawler(company)
+            df.append({'Company_Name': company['company_name'], 'URLS': company['url'], 'Career': list(pc.map_website())})
+            df.to_pickle(DF_FILE)
 
 

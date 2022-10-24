@@ -7,6 +7,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from time import sleep
+import json
 
 
 """https://growjo.com/api/companies?order=desc&orderBy=employee_growth&offset=0&rowsPerPage=50&filter={"industry":"AI","country":"Germany",}"""
@@ -77,14 +78,13 @@ class GrowJoAPI:
         pass
 
     def get_companies(self):
-        data = requests.get(
+        response = requests.get(
             'https://growjo.com/api/companies?order=desc&orderBy=employee_growth&offset=0&rowsPerPage=50&filter={"industry":"AI","country":"Germany"}',
             headers={
                 "auth" : self.auth,
                 "authorization" : self.authorization
             })
 
-
-        return data
+        return json.loads(response.text)['data']
 
 

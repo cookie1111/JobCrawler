@@ -4,12 +4,14 @@ import queue
 from time import sleep
 from urllib.parse import urlparse, urljoin
 from bs4 import BeautifulSoup
+from deep_translator import GoogleTranslator as Translator
 
 class PageCrawler:
 
     def __init__(self, company, search_for = ["career", "we-are-recruiting","we-are-hiring", "job", "positions", "welcomekit", "joinus", "join-us", "recruit"]):
         self.compare_list = search_for
-        self.url = company["url"]
+        self.url = "https://" + company["url"]
+        self.compare_list = self.add_translations(self.get_language())
         self.urls_internal = set(self.url)
         self.urls_queue = queue.Queue()
         self.urls_queue.put(self.url)
@@ -25,6 +27,16 @@ class PageCrawler:
     def get_about_us(self, urls):
         pass
 
+    def get_language(self):
+        soup = BeautifulSoup(requests.get(self.url).content, 'html.parser')
+        text_page = soup.get_text()
+        return ld.detect(text_page)
+
+    def add_translations(self, lang):
+        t = Translator(source='en', target=lang)
+        return self.compare_list + t.translate_batch(self.compare_list)
+
+
     def map_website(self):
         #init the crawl
         external_urls = set()
@@ -35,9 +47,10 @@ class PageCrawler:
         self._check_external_urls(external_urls_new)
         external_urls = external_urls.union(external_urls_new)
         while not self.urls_queue.empty():
+            print(list(self.urls_queue.queue))
             url = self.urls_queue.get()
             if self.search_for_job_page(url):
-                self.potential_job_pages.add(url)
+                return self.potential_job_pages
             try:
                 urls, external_urls_new = self.get_page_urls(url, external_urls)
             except requests.exceptions.InvalidSchema:
