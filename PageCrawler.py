@@ -9,13 +9,38 @@ from deep_translator import GoogleTranslator as Translator
 class PageCrawler:
 
     def __init__(self, company, search_for = ["career", "we-are-recruiting","we-are-hiring", "job", "positions", "welcomekit", "joinus", "join-us", "recruit"]):
-        self.compare_list = search_for
         self.url = "https://" + company["url"]
+        if not self._try_url():
+            self.dead_link = True
+        else:
+            self.dead_link = False
+        self.compare_list = search_for
         self.compare_list = self.add_translations(self.get_language())
         self.urls_internal = set(self.url)
         self.urls_queue = queue.Queue()
         self.urls_queue.put(self.url)
         self.potential_job_pages = set()
+
+    def _try_url(self):
+        try:
+            response = requests.get(self.url)
+            response.raise_for_status()
+            return True
+        except requests.exceptions.HTTPError as e:
+            print(self.url, ": ", e)
+            return False
+        except requests.exceptions.Timeout as e:
+            print(self.url,": ", e)
+            return False
+        except requests.exceptions.TooManyRedirects as e:
+            print(self.url, ": ", e)
+            return False
+        except requests.exceptions.SSLError as e:
+            print(self.url, ": ", e)
+            return False
+        except requests.exceptions.ConnectionError as e:
+            print(self.url, ": ", e)
+            return False
 
 
     def search_for_job_page(self, url):
