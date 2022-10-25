@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 
 class PageCrawler:
 
-    def __init__(self, company, search_for = ["career", "we-are-recruiting","we-are-hiring", "job", "positions", "welcomekit", "joinus", "join-us", "recruit","work"]):
+    def __init__(self, company, search_for = ["career", "we-are-recruiting","we-are-hiring", "job", "positions", "welcomekit", "joinus", "join-us", "recruit","work-with-us","work-for-us"]):
         self.url = "https://" + company["url"]
         if not self._try_url():
             self.dead_link = True
