@@ -18,7 +18,7 @@ grow_jo = GrowJoAPI(usr, pwd, log = True)
 if isfile(DF_FILE):
     df = pd.read_pickle(DF_FILE)
 else:
-    df = pd.DataFrame(columns = ['Company_Name', 'URL', 'Career'])
+    df = pd.DataFrame(columns = ['Company_Name', 'URL', 'Career', 'Internal_Potential_Job', 'External_Potential_Job'])
 
 
 
@@ -75,7 +75,8 @@ if __name__ == '__main__':
         print(company["company_name"])
         if not df['Company_Name'].str.contains(company['company_name']).any():
             pc = PageCrawler(company)
-            df.append({'Company_Name': company['company_name'], 'URLS': company['url'], 'Career': list(pc.map_website())})
+            career, internal_jobs, external_jobs = pc.map_first_page_only()
+            df.concat({'Company_Name': company['company_name'], 'URLS': company['url'], 'Career': list(career), 'Internal_Potential_Job' : list(internal_jobs), 'External_Potential_Job' : list(external_jobs)}, axis = 0, ignore_index=True)
             df.to_pickle(DF_FILE)
 
 

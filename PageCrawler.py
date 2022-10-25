@@ -36,6 +36,24 @@ class PageCrawler:
         t = Translator(source='en', target=lang)
         return self.compare_list + t.translate_batch(self.compare_list)
 
+    def map_first_page_only(self):
+        # init the crawl
+        external_urls = set()
+        if self.search_for_job_page(self.url):
+            self.potential_job_pages.add(self.url)
+        urls, external_urls_new = self.get_page_urls(self.url, external_urls)
+        # check external links for jobs
+        self._check_external_urls(external_urls_new)
+        external_urls = external_urls.union(external_urls_new)
+
+        potential_job_internal = set()
+        potential_job_external = set()
+        if len(self.potential_job_pages):
+            for job_page in list(self.potential_job_pages):
+                job_internal, job_external = self.get_page_urls(job_page, external_urls)
+                potential_job_internal.update(job_internal)
+                potential_job_external.upadte(job_external)
+        return self.potential_job_pages, potential_job_internal, potential_job_external
 
     def map_website(self):
         #init the crawl
@@ -59,14 +77,13 @@ class PageCrawler:
             external_urls = external_urls.union(external_urls_new)
             sleep(0.3)
 
-        if len(self.potential_job_pages):
+        if len(self.potential_job_pages) == 0:
             print(self.url, ": no job page found!")
 
         return self.potential_job_pages
 
-
-    #possible alternative
-    def find_career_button(self, ):
+    # possible alternative
+    def find_career_button(self):
         pass
 
     def get_page_urls(self, url, external_urls):
