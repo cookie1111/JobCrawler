@@ -13,7 +13,7 @@ with open("usr.txt", 'r') as f:
     usr = lines[0]
     pwd = lines[1]
 
-#page_crawler = PageCrawler({"url" : "https://neuralink.com/"})
+#page_crawler = PageCrawler({"url" : "simreka.com"})
 grow_jo = GrowJoAPI(usr, pwd, log = True)
 if isfile(DF_FILE):
     df = pd.read_pickle(DF_FILE)
@@ -26,7 +26,7 @@ if __name__ == '__main__':
     if TEST == 0:
     # crawler tests
         pass
-        #print(page_crawler.get_page_urls("https://neuralink.com/",set()))
+        #print(page_crawler.map_first_page_only())
         #print(page_crawler.map_website())
 
     if TEST == 1:
@@ -79,7 +79,7 @@ if __name__ == '__main__':
             except:
                 continue
             career, internal_jobs, external_jobs = pc.map_first_page_only()
-            df = df.append({'Company_Name': company['company_name'], 'URLS': company['url'], 'Career': list(career), 'Internal_Potential_Job' : list(internal_jobs), 'External_Potential_Job' : list(external_jobs)}, ignore_index=True)
+            df = df.append({'Company_Name': company['company_name'], 'URL': company['url'], 'Career': list(career), 'Internal_Potential_Job' : list(internal_jobs), 'External_Potential_Job' : list(external_jobs)}, ignore_index=True)
             df.to_pickle(DF_FILE)
 
 

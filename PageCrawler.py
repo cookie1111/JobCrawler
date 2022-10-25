@@ -5,10 +5,11 @@ from time import sleep
 from urllib.parse import urlparse, urljoin
 from bs4 import BeautifulSoup
 from deep_translator import GoogleTranslator as Translator
+from urllib.parse import urlparse
 
 class PageCrawler:
 
-    def __init__(self, company, search_for = ["career", "we-are-recruiting","we-are-hiring", "job", "positions", "welcomekit", "joinus", "join-us", "recruit"]):
+    def __init__(self, company, search_for = ["career", "we-are-recruiting","we-are-hiring", "job", "positions", "welcomekit", "joinus", "join-us", "recruit","work"]):
         self.url = "https://" + company["url"]
         if not self._try_url():
             self.dead_link = True
@@ -44,8 +45,9 @@ class PageCrawler:
 
 
     def search_for_job_page(self, url):
+        parsed = urlparse(url)
         for w in self.compare_list:
-            if w in url:
+            if w in parsed.path:
                 return True
         return False
 
@@ -70,6 +72,11 @@ class PageCrawler:
         # check external links for jobs
         self._check_external_urls(external_urls_new)
         external_urls = external_urls.union(external_urls_new)
+        # check internal links for jobs
+        print(urls)
+        for url in list(urls):
+            if self.search_for_job_page(url):
+                self.potential_job_pages.add(url)
 
         potential_job_internal = set()
         potential_job_external = set()
@@ -77,7 +84,7 @@ class PageCrawler:
             for job_page in list(self.potential_job_pages):
                 job_internal, job_external = self.get_page_urls(job_page, external_urls)
                 potential_job_internal.update(job_internal)
-                potential_job_external.upadte(job_external)
+                potential_job_external.update(job_external)
         return self.potential_job_pages, potential_job_internal, potential_job_external
 
     def map_website(self):
