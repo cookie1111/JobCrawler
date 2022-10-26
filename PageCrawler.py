@@ -15,16 +15,17 @@ class PageCrawler:
             self.dead_link = True
         else:
             self.dead_link = False
-        self.compare_list = search_for
-        self.compare_list = self.add_translations(self.get_language())
-        self.urls_internal = set(self.url)
-        self.urls_queue = queue.Queue()
-        self.urls_queue.put(self.url)
-        self.potential_job_pages = set()
+        if not self.dead_link:
+            self.compare_list = search_for
+            self.compare_list = self.add_translations(self.get_language())
+            self.urls_internal = set(self.url)
+            self.urls_queue = queue.Queue()
+            self.urls_queue.put(self.url)
+            self.potential_job_pages = set()
 
     def _try_url(self):
         try:
-            response = requests.get(self.url)
+            response = requests.get(self.url,timeout=3)
             response.raise_for_status()
             return True
         except requests.exceptions.HTTPError as e:
