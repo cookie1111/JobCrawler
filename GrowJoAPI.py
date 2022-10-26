@@ -99,17 +99,17 @@ class GrowJoAPI:
         else:
             return None
 
-    def get_companies(self):
+    def get_companies(self,page = 0, rows = 50):
         filter = self.get_filter()
         print(filter)
         response = requests.get(
             #'https://growjo.com/api/companies?order=desc&orderBy=employee_growth&offset=0&rowsPerPage=50&filter={"industry":"AI","country":"Germany"}',
-            f'https://growjo.com/api/companies?order=desc&orderBy=employee_growth&offset=0&rowsPerPage=50&{filter if filter else ""}',
+            f'https://growjo.com/api/companies?order=desc&orderBy=employee_growth&offset={page*rows}&rowsPerPage={rows}&{filter if filter else ""}',
             headers={
                 "auth" : self.auth,
                 "authorization" : self.authorization
             })
 
-        return json.loads(response.text)['data']
+        return json.loads(response.text)['data'],json.loads(response.text)['totalCount']
 
 

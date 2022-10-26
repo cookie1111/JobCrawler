@@ -1,3 +1,6 @@
+import math
+import sys
+
 from GrowJoAPI import GrowJoAPI
 from PageCrawler import PageCrawler
 from time import sleep
@@ -70,17 +73,21 @@ if __name__ == '__main__':
         pass
 
     grow_jo.set_field('')
-    data = grow_jo.get_companies()
-    print("past")
-    for company in data:
-        print(company["company_name"])
-        if not df['Company_Name'].str.contains(company['company_name']).any():
-            try:
-                pc = PageCrawler(company)
-            except:
-                continue
-            career, internal_jobs, external_jobs = pc.map_first_page_only()
-            df = df.append({'Company_Name': company['company_name'], 'URL': company['url'], 'Career': list(career), 'Internal_Potential_Job' : list(internal_jobs), 'External_Potential_Job' : list(external_jobs)}, ignore_index=True)
-            df.to_pickle(DF_FILE)
+
+    #print(len(data))
+    #sys.exit()
+    data,amount = grow_jo.get_companies()
+    for i in range(int(math.ceil(amount/50))):
+        data, amount = grow_jo.get_companies(page=i)
+        for company in data:
+            print(company["company_name"])
+            if not df['Company_Name'].str.contains(company['company_name']).any():
+                try:
+                    pc = PageCrawler(company)
+                except:
+                    continue
+                career, internal_jobs, external_jobs = pc.map_first_page_only()
+                df = df.append({'Company_Name': company['company_name'], 'URL': company['url'], 'Career': list(career), 'Internal_Potential_Job' : list(internal_jobs), 'External_Potential_Job' : list(external_jobs)}, ignore_index=True)
+                df.to_pickle(DF_FILE)
 
 
