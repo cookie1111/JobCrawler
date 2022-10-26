@@ -69,8 +69,9 @@ if __name__ == '__main__':
         #grow_jo.get_companies()
         pass
 
+    grow_jo.set_field('')
     data = grow_jo.get_companies()
-
+    print("past")
     for company in data:
         print(company["company_name"])
         if not df['Company_Name'].str.contains(company['company_name']).any():

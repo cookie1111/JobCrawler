@@ -77,9 +77,34 @@ class GrowJoAPI:
         if self.log: print(self.city, end=""),
         pass
 
+    def get_filter(self):
+        #'{"industry": "AI", "country": "Germany", "subIndustry","3D", "city":"London"}'
+        city = ""
+        field = ""
+        subfield = ""
+        country = ""
+        if self.city:
+            city = f'"city":"{self.city}"'
+        if self.country:
+            country = f'"country":"{self.country}"'
+        if self.field:
+            field = f'"industry":"{self.field}"'
+        if self.subfield:
+            subfield = f'"subIndustry":"{self.subfield}"'
+        if city or field or country or subfield:
+            filter = f"{(city+',') if city else ''}{(country+',') if country else ''}{(field+',') if field else ''}{(subfield+',') if subfield else ''}"
+            if filter[-1] == ',':
+                filter = filter[:-1]
+            return f"filter={{{filter}}}"
+        else:
+            return None
+
     def get_companies(self):
+        filter = self.get_filter()
+        print(filter)
         response = requests.get(
-            'https://growjo.com/api/companies?order=desc&orderBy=employee_growth&offset=0&rowsPerPage=50&filter={"industry":"AI","country":"Germany"}',
+            #'https://growjo.com/api/companies?order=desc&orderBy=employee_growth&offset=0&rowsPerPage=50&filter={"industry":"AI","country":"Germany"}',
+            f'https://growjo.com/api/companies?order=desc&orderBy=employee_growth&offset=0&rowsPerPage=50&{filter if filter else ""}',
             headers={
                 "auth" : self.auth,
                 "authorization" : self.authorization
