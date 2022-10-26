@@ -123,7 +123,12 @@ class PageCrawler:
         urls = set()
         external_urls_new = set()
         domain = urlparse(url).netloc
-        soup = BeautifulSoup(requests.get(url).content, "html.parser")
+        try:
+            soup = BeautifulSoup(requests.get(url, timeout=3).content, "html.parser")
+        except requests.exceptions.Timeout as e:
+            print(self.url, ": ", e)
+            return urls, external_urls_new
+
 
         for linkie in soup.findAll('a'):
             href = linkie.attrs.get("href")

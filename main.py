@@ -83,7 +83,7 @@ if __name__ == '__main__':
         start = time.process_time_ns()
         for company in data:
             print(company["company_name"])
-            if not df['Company_Name'].str.contains(company['company_name']).any():
+            if not df['Company_Name'].str.contains(company['company_name'], regex=False).any():
                 try:
                     pc = PageCrawler(company)
                 except:
