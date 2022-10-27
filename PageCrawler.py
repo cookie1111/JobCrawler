@@ -128,7 +128,18 @@ class PageCrawler:
         except requests.exceptions.Timeout as e:
             print(self.url, ": ", e)
             return urls, external_urls_new
-
+        except requests.exceptions.HTTPError as e:
+            print(self.url, ": ", e)
+            return urls, external_urls_new
+        except requests.exceptions.TooManyRedirects as e:
+            print(self.url, ": ", e)
+            return urls, external_urls_new
+        except requests.exceptions.SSLError as e:
+            print(self.url, ": ", e)
+            return urls, external_urls_new
+        except requests.exceptions.ConnectionError as e:
+            print(self.url, ": ", e)
+            return urls, external_urls_new
 
         for linkie in soup.findAll('a'):
             href = linkie.attrs.get("href")
@@ -140,9 +151,12 @@ class PageCrawler:
 
             parse_href = urlparse(href)
             href = parse_href.scheme + "://" + parse_href.netloc + parse_href.path
-            if not self._check_is_valid_url(href) or href in self.urls_internal:
+            try:
+                if not self._check_is_valid_url(href) or href in self.urls_internal:
+                    continue
+            except ValueError as e:
+                print(href, ": ", e)
                 continue
-
             if domain not in href:
                 if href not in external_urls:
                     external_urls_new.add(href)
