@@ -18,7 +18,7 @@ class PageCrawler:
         if not self.dead_link:
             self.compare_list = search_for
             self.compare_list = self.add_translations(self.get_language())
-            self.urls_internal = set(self.url)
+            self.urls_internal = set([self.url])
             self.urls_queue = queue.Queue()
             self.urls_queue.put(self.url)
             self.potential_job_pages = set()
@@ -88,6 +88,27 @@ class PageCrawler:
                 potential_job_external.update(job_external)
         return self.potential_job_pages, potential_job_internal, potential_job_external
 
+    def map_website_n_deep_save_html(self, n=2, max_pages = 50, path = "/urls"):
+        cur_lvl = set([self.url])
+        overall = set([self.url])
+        external = set()
+        next_lvl = set()
+        for i in range(n):
+            for url in cur_lvl:
+                cur, ext, html = self.get_page_urls(url,external, return_html=True)
+                with open(path+'/' + url.replace('.', '_') + '.html','wb+') as f:
+                    #figure out a naming convention
+                    f.write(html)
+                next_lvl.add(cur.difference(overall))
+                # for now we don't grab external pages
+                # next_lvl.add(ext.difference(external))
+                sleep(0.05)
+            overall = overall.union(next_lvl)
+            cur_lvl = next_lvl
+            next_lvl = set()
+
+        pass
+
     def map_website(self):
         #init the crawl
         external_urls = set()
@@ -119,12 +140,17 @@ class PageCrawler:
     def find_career_button(self):
         pass
 
-    def get_page_urls(self, url, external_urls):
+    def get_page_urls(self, url, external_urls, return_html = False):
+        """
+
+        :rtype: set(internal_urls),set(external_urls) or -||- + html of page
+        """
         urls = set()
         external_urls_new = set()
         domain = urlparse(url).netloc
         try:
-            soup = BeautifulSoup(requests.get(url, timeout=3).content, "html.parser")
+            re = requests.get(url, timeout=3).content
+            soup = BeautifulSoup(re, "html.parser")
         except requests.exceptions.Timeout as e:
             print(self.url, ": ", e)
             return urls, external_urls_new
@@ -166,6 +192,8 @@ class PageCrawler:
             #print(href)
             self.urls_queue.put(href)
             urls.add(href)
+        if return_html:
+            return urls,external_urls_new, re.content
         return urls, external_urls_new
 
     def _check_external_urls(self, external_urls):

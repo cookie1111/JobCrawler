@@ -73,28 +73,31 @@ if __name__ == '__main__':
         #grow_jo.get_companies()
         pass
 
-    grow_jo.set_field('')
+    if TEST == 3:
+        grow_jo.set_field('')
 
-    #print(len(data))
-    #sys.exit()
-    data,amount = grow_jo.get_companies()
-    for i in range(int(math.ceil(amount/50))):
-        data, amount = grow_jo.get_companies(page=i)
-        start = time.process_time_ns()
-        for company in data:
-            print(company["company_name"])
-            if not df['Company_Name'].str.contains(company['company_name'], regex=False).any():
-                try:
-                    pc = PageCrawler(company)
-                except:
-                    continue
-                if pc.dead_link:
-                    continue
-                career, internal_jobs, external_jobs = pc.map_first_page_only()
-                df = df.append({'Company_Name': company['company_name'], 'URL': company['url'], 'Career': list(career), 'Internal_Potential_Job' : list(internal_jobs), 'External_Potential_Job' : list(external_jobs)}, ignore_index=True)
-                df.to_pickle(DF_FILE)
-        delta = time.process_time_ns() -start
-        if delta < 1000000000:
-            time.sleep((1000000000-delta)/1000000000)
+        #print(len(data))
+        #sys.exit()
+        data,amount = grow_jo.get_companies()
+        for i in range(int(math.ceil(amount/50))):
+            data, amount = grow_jo.get_companies(page=i)
+            start = time.process_time_ns()
+            for company in data:
+                print(company["company_name"])
+                if not df['Company_Name'].str.contains(company['company_name'], regex=False).any():
+                    try:
+                        pc = PageCrawler(company)
+                    except:
+                        continue
+                    if pc.dead_link:
+                        continue
+                    career, internal_jobs, external_jobs = pc.map_first_page_only()
+                    df = df.append({'Company_Name': company['company_name'], 'URL': company['url'], 'Career': list(career), 'Internal_Potential_Job' : list(internal_jobs), 'External_Potential_Job' : list(external_jobs)}, ignore_index=True)
+                    df.to_pickle(DF_FILE)
+            delta = time.process_time_ns() -start
+            if delta < 1000000000:
+                time.sleep((1000000000-delta)/1000000000)
 
+    if TEST == 4:
+        for row in df.URL:
 
