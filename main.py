@@ -10,6 +10,7 @@ from pathlib import Path
 
 TEST = 4
 DF_FILE = "sites.pkl"
+PAGES_PATH = "pages_ds/"
 
 def create_crawler_and_run_it(url, path):
     craw = PageCrawler({"url":url})
@@ -105,5 +106,5 @@ if __name__ == '__main__':
     if TEST == 4:
         for url in df.URL:
             print(url,":")
-            create_crawler_and_run_it(url,url.replace('.','_'))
+            create_crawler_and_run_it(url,PAGES_PATH + url.replace('.','_'))
             break
