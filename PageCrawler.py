@@ -6,6 +6,7 @@ from urllib.parse import urlparse, urljoin
 from bs4 import BeautifulSoup
 from deep_translator import GoogleTranslator as Translator
 from urllib.parse import urlparse
+from pathlib import Path
 
 class PageCrawler:
 
@@ -88,18 +89,28 @@ class PageCrawler:
                 potential_job_external.update(job_external)
         return self.potential_job_pages, potential_job_internal, potential_job_external
 
-    def map_website_n_deep_save_html(self, n=2, max_pages = 50, path = "/urls"):
+    def map_website_n_deep_save_html(self, n=2, max_pages = 100, path = "/urls"):
         cur_lvl = set([self.url])
         overall = set([self.url])
         external = set()
         next_lvl = set()
         for i in range(n):
+            print("depth: ",i," amount: ",len(cur_lvl))
             for url in cur_lvl:
-                cur, ext, html = self.get_page_urls(url,external, return_html=True)
-                with open(path+'/' + url.replace('.', '_') + '.html','wb+') as f:
-                    #figure out a naming convention
-                    f.write(html)
-                next_lvl.add(cur.difference(overall))
+                cur, ext, html = self.get_page_urls(url, external, return_html=True)
+                if html is None:
+                    continue
+                url = url.replace('https://','')
+                url = url.replace('/','-')
+                if not Path(path+'/' + url.replace('.', '_') + '.html').is_file():
+                    with open(path+'/' + url.replace('.', '_') + '.html', 'wb+') as f:
+                        #figure out a naming convention
+                        f.write(html)
+                grabbed = cur.difference(overall)
+                if len(grabbed) > max_pages:
+                    sleep(0.05)
+                    continue
+                next_lvl = next_lvl.union(cur.difference(overall))
                 # for now we don't grab external pages
                 # next_lvl.add(ext.difference(external))
                 sleep(0.05)
@@ -149,22 +160,32 @@ class PageCrawler:
         external_urls_new = set()
         domain = urlparse(url).netloc
         try:
-            re = requests.get(url, timeout=3).content
-            soup = BeautifulSoup(re, "html.parser")
+            re = requests.get(url, timeout=3)
+            soup = BeautifulSoup(re.content, "html.parser")
         except requests.exceptions.Timeout as e:
-            print(self.url, ": ", e)
+            print(url, ": ", e)
+            if return_html:
+                return urls, external_urls_new, None
             return urls, external_urls_new
         except requests.exceptions.HTTPError as e:
-            print(self.url, ": ", e)
+            print(url, ": ", e)
+            if return_html:
+                return urls, external_urls_new, None
             return urls, external_urls_new
         except requests.exceptions.TooManyRedirects as e:
-            print(self.url, ": ", e)
+            print(url, ": ", e)
+            if return_html:
+                return urls, external_urls_new, None
             return urls, external_urls_new
         except requests.exceptions.SSLError as e:
-            print(self.url, ": ", e)
+            print(url, ": ", e)
+            if return_html:
+                return urls, external_urls_new, None
             return urls, external_urls_new
         except requests.exceptions.ConnectionError as e:
-            print(self.url, ": ", e)
+            print(url, ": ", e)
+            if return_html:
+                return urls, external_urls_new, None
             return urls, external_urls_new
 
         for linkie in soup.findAll('a'):

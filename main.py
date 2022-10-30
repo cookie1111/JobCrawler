@@ -1,16 +1,20 @@
 import math
 import sys
 import time
-
 from GrowJoAPI import GrowJoAPI
 from PageCrawler import PageCrawler
 from time import sleep
 import pandas as pd
 from os.path import isfile
+from pathlib import Path
 
-TEST = -1
-
+TEST = 4
 DF_FILE = "sites.pkl"
+
+def create_crawler_and_run_it(url, path):
+    craw = PageCrawler({"url":url})
+    Path(path).mkdir(parents=True, exist_ok=True)
+    craw.map_website_n_deep_save_html(n=3,path=path)
 
 with open("usr.txt", 'r') as f:
     lines = f.read().splitlines()
@@ -99,5 +103,7 @@ if __name__ == '__main__':
                 time.sleep((1000000000-delta)/1000000000)
 
     if TEST == 4:
-        for row in df.URL:
-
+        for url in df.URL:
+            print(url,":")
+            create_crawler_and_run_it(url,url.replace('.','_'))
+            break
