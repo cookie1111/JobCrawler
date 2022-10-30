@@ -1,4 +1,5 @@
 import langdetect as ld
+import pandas as pd
 import requests
 import queue
 from time import sleep
@@ -23,6 +24,7 @@ class PageCrawler:
             self.urls_queue = queue.Queue()
             self.urls_queue.put(self.url)
             self.potential_job_pages = set()
+            self.timeout_crawler = 0.05
 
     def _try_url(self):
         try:
@@ -94,26 +96,34 @@ class PageCrawler:
         overall = set([self.url])
         external = set()
         next_lvl = set()
+        df = pd.DataFrame(columns=["URL","id"])
+        identity = 0
         for i in range(n):
             print("depth: ",i," amount: ",len(cur_lvl))
             for url in cur_lvl:
                 cur, ext, html = self.get_page_urls(url, external, return_html=True)
                 if html is None:
                     continue
-                url = url.replace('https://','')
+
+                """url = url.replace('https://','')
                 url = url.replace('/','-')
                 if not Path(path+'/' + url.replace('.', '_') + '.html').is_file():
-                    with open(path+'/' + url.replace('.', '_') + '.html', 'wb+') as f:
+                    with open(path+'/' + url.replace('.', '_') + '.html', 'wb+') as f:"""
+                if not Path(path+'/'+str(identity) +'.html').is_file():
+                    with open(path + '/'+ str(identity) +'.html', 'wb+') as f:
+                        df = pd.concat([df,pd.DataFrame([{"URL":url,"id":identity}])])
                         #figure out a naming convention
                         f.write(html)
+                        identity = identity + 1
+                    df.to_pickle(path+'/df.pkl')
                 grabbed = cur.difference(overall)
                 if len(grabbed) > max_pages:
-                    sleep(0.05)
+                    sleep(self.timeout_crawler)
                     continue
                 next_lvl = next_lvl.union(cur.difference(overall))
                 # for now we don't grab external pages
                 # next_lvl.add(ext.difference(external))
-                sleep(0.05)
+                sleep(0.1)
             overall = overall.union(next_lvl)
             cur_lvl = next_lvl
             next_lvl = set()
@@ -160,10 +170,11 @@ class PageCrawler:
         external_urls_new = set()
         domain = urlparse(url).netloc
         try:
-            re = requests.get(url, timeout=3)
+            re = requests.get(url, timeout=4)
             soup = BeautifulSoup(re.content, "html.parser")
         except requests.exceptions.Timeout as e:
             print(url, ": ", e)
+            self.timeout_crawler = self.timeout_crawler + 0.05
             if return_html:
                 return urls, external_urls_new, None
             return urls, external_urls_new
