@@ -10,11 +10,14 @@ from bs4 import BeautifulSoup
 from deep_translator import GoogleTranslator as Translator
 from urllib.parse import urlparse
 from pathlib import Path
-from typing import List, Set, Tuple
+from typing import List, Set, Tuple, Dict
+
 
 class PageCrawler:
 
-    def __init__(self, company, search_for = ["career", "we-are-recruiting","we-are-hiring", "job", "positions", "welcomekit", "joinus", "join-us", "recruit","work-with-us","work-for-us"]):
+    def __init__(self, company: Dict,
+                 search_for: List[str] = ["career", "we-are-recruiting", "we-are-hiring", "job", "positions", "welcomekit",
+                                       "joinus", "join-us", "recruit", "work-with-us", "work-for-us"]) -> None:
         self.url = "https://" + company["url"]
         if not self._try_url():
             self.dead_link = True
