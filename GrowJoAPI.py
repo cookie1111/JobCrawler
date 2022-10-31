@@ -7,6 +7,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from time import sleep
+from typing import Tuple, List, Dict
 import json
 
 
@@ -14,7 +15,14 @@ import json
 
 class GrowJoAPI:
 
-    def __init__(self, usr, pwd, log = False, ):
+    def __init__(self, usr: str, pwd: str, log: bool = False, ) -> None:
+        """
+        creates the GrowJoApi class and gets the auth and authorization header fields
+
+        :param usr: username store it in a seperate file and load it in
+        :param pwd: password store it in a seperate file and load it in
+        :param log: show log if True
+        """
         self.country = "Germany"
         self.field = "AI"
         self.subfield = ""
@@ -22,10 +30,15 @@ class GrowJoAPI:
         self.log = log
         self.usr = usr
         self.pwd = pwd
-        self.auth, self.authorization = self._get_auth_and_authorization()
+        self.auth, self.authorization = self._get_auth_and_authorization
 
+    @property
+    def _get_auth_and_authorization(self) -> Tuple[str, str]:
+        """
+        grabs auth and authorization by logging you in and grabbing the header fields using selenium_wire
 
-    def _get_auth_and_authorization(self):
+        :return: auth and authorization header fields
+        """
         options = webdriver.ChromeOptions()
 
         wire_opt = {}
@@ -57,27 +70,52 @@ class GrowJoAPI:
 
         return auth, authorization
 
-    def set_country(self,country):
+    def set_country(self, country: str) -> None:
+        """
+        sets the country field of the search
+
+        :param country: name of country
+        """
         self.country = country
         if self.log : print(self.country, end=", "),
         pass
 
-    def set_field(self, field):
+    def set_field(self, field: str) -> None:
+        """
+        sets the industry field of the search
+
+        :param field: name of industry
+        """
         self.field = field
         if self.log: print(self.field, end=", "),
         pass
 
-    def set_subfield(self, subfield):
+    def set_subfield(self, subfield: str) -> None:
+        """
+        set the sub industry field of the search
+
+        :param subfield: name of subindustry
+        """
         self.subfield = subfield
         if self.log: print(self.subfield, end=", "),
         pass
 
-    def set_city(self, city):
+    def set_city(self, city: str) -> object:
+        """
+        set the city field of the search
+
+        :param city: name of city
+        """
         self.city = city
         if self.log: print(self.city, end=""),
         pass
 
-    def get_filter(self):
+    def get_filter(self) -> str:
+        """
+        constructs the filter string
+
+        :return: constructed filter string
+        """
         #'{"industry": "AI", "country": "Germany", "subIndustry","3D", "city":"London"}'
         city = ""
         field = ""
@@ -99,7 +137,14 @@ class GrowJoAPI:
         else:
             return None
 
-    def get_companies(self,page = 0, rows = 50):
+    def get_companies(self, page: int = 0, rows: int = 50) -> Tuple[List[Dict], int]:
+        """
+        grab company list(paged) call repeatedly with different page value to scroll through
+
+        :param page: page of the data
+        :param rows: amount of data per apge
+        :return: (list of companies, amount of found companies)
+        """
         filter = self.get_filter()
         print(filter)
         response = requests.get(
