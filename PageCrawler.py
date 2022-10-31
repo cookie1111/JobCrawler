@@ -1,3 +1,5 @@
+from typing import Set, Any
+
 import langdetect as ld
 import pandas as pd
 import requests
@@ -8,6 +10,7 @@ from bs4 import BeautifulSoup
 from deep_translator import GoogleTranslator as Translator
 from urllib.parse import urlparse
 from pathlib import Path
+from typing import List, Set, Tuple
 
 class PageCrawler:
 
@@ -26,7 +29,11 @@ class PageCrawler:
             self.potential_job_pages = set()
             self.timeout_crawler = 0.05
 
-    def _try_url(self):
+    def _try_url(self) -> bool:
+        """
+        tests if the url is working
+        :return: True if work else False
+        """
         try:
             response = requests.get(self.url,timeout=3)
             response.raise_for_status()
@@ -48,7 +55,13 @@ class PageCrawler:
             return False
 
 
-    def search_for_job_page(self, url):
+    def search_for_job_page(self, url: str) -> bool:
+        """
+        searches for a career href based on a list of keywords
+
+        :param url: url w of page within which to look 
+        :return: True if career page was found else False
+        """
         parsed = urlparse(url)
         for w in self.compare_list:
             if w in parsed.path:
@@ -58,16 +71,32 @@ class PageCrawler:
     def get_about_us(self, urls):
         pass
 
-    def get_language(self):
+    def get_language(self) -> str:
+        """
+        detects the language of the page
+
+        :return: shortened name of the language 
+        """
         soup = BeautifulSoup(requests.get(self.url).content, 'html.parser')
         text_page = soup.get_text()
         return ld.detect(text_page)
 
-    def add_translations(self, lang):
+    def add_translations(self, lang: str) -> List:
+        """
+        Based on input translate all the keywords in compare list to the target langauge
+
+        :param lang: target language e.g. "en","de"..
+        :return: new list with added words from target language
+        """
         t = Translator(source='en', target=lang)
         return self.compare_list + t.translate_batch(self.compare_list)
 
-    def map_first_page_only(self):
+    def map_first_page_only(self) -> Tuple[Set[str], Set[str], Set[str]]:
+        """
+        grabs all href found on the main page and ends there
+
+        :return: (potential job , potential job internal, potential job external pages)
+        """
         # init the crawl
         external_urls = set()
         if self.search_for_job_page(self.url):
@@ -83,7 +112,7 @@ class PageCrawler:
                 self.potential_job_pages.add(url)
 
         potential_job_internal = set()
-        potential_job_external = set()
+        potential_job_external: set[str] = set()
         if len(self.potential_job_pages):
             for job_page in list(self.potential_job_pages):
                 job_internal, job_external = self.get_page_urls(job_page, external_urls)
@@ -91,7 +120,22 @@ class PageCrawler:
                 potential_job_external.update(job_external)
         return self.potential_job_pages, potential_job_internal, potential_job_external
 
-    def map_website_n_deep_save_html(self, n=2, max_pages = 100, path = "/urls"):
+    def map_website_n_deep_save_html(self, n: int = 2, max_pages: int = 100, path: str = "/urls") -> None:
+        """
+        saves html files of all grabbed links from the pages. Iterates over the tree like structure of links and goes to
+        nth depth.
+        0                        main_page
+                 ___________________|_____________________
+                 |                  |                    |
+        1       page1              page2                 page3
+             _____|______       _____|______               |
+             |          |       |          |               |
+        2   page4       page5   page6       page7           page8
+
+        :param n: amount of layers to map
+        :param max_pages: max amount of hrefs in a page to add
+        :param path: path to directory to store the pages
+        """
         cur_lvl = set([self.url])
         overall = set([self.url])
         external = set()
@@ -130,6 +174,7 @@ class PageCrawler:
 
         pass
 
+    # not used i think
     def map_website(self):
         #init the crawl
         external_urls = set()
@@ -161,10 +206,15 @@ class PageCrawler:
     def find_career_button(self):
         pass
 
-    def get_page_urls(self, url, external_urls, return_html = False):
+    def get_page_urls(self, url: str, external_urls: Set[str], return_html: bool = False) -> Tuple[Set[str], Set[str], object]:
         """
+        return all the hrefs found in the page seperated external and internals and the content of the html page. Tuple is
+        of variable size depending on if return_html is True or not
 
-        :rtype: set(internal_urls),set(external_urls) or -||- + html of page
+        :param url: page to scan for hrefs through
+        :param external_urls: previously found external urls stored in Set
+        :param return_html: weather to return the html of the page or not
+        :return: internal urls, external urls, if return_html : page content
         """
         urls = set()
         external_urls_new = set()
@@ -237,7 +287,12 @@ class PageCrawler:
     def _welcome_to_the_jungle(self, url):
         pass
 
+    def _check_is_valid_url(self, url: str) -> bool:
+        """
+        cehck wether the url is a valid one in terms of structure
 
-    def _check_is_valid_url(self, url):
+        :param url: url in string form
+        :return: True if valid url else False
+        """
         parse = urlparse(url)
         return bool(parse.netloc) and bool(parse.scheme)
