@@ -7,12 +7,14 @@ from time import sleep
 import pandas as pd
 from os.path import isfile
 from pathlib import Path
+import concurrent.futures as ft
 
 TEST = 4
 DF_FILE = "sites.pkl"
 PAGES_PATH = "pages_ds/"
 
 def create_crawler_and_run_it(url, path):
+    print("working on url")
     craw = PageCrawler({"url":url})
     Path(path).mkdir(parents=True, exist_ok=True)
     craw.map_website_n_deep_save_html(n=3,path=path)
@@ -104,7 +106,10 @@ if __name__ == '__main__':
                 time.sleep((1000000000-delta)/1000000000)
 
     if TEST == 4:
-        for url in df.URL:
+        executor = ft.ProcessPoolExecutor(5)
+        futs = [executor.submit(create_crawler_and_run_it, url, PAGES_PATH+url.replace('.', '_')) for url in df.URL.iloc[:10]]
+        ft.wait(futs)
+        """for url in df.URL:
             print(url,":")
             create_crawler_and_run_it(url,PAGES_PATH + url.replace('.','_'))
-            break
+            break"""
