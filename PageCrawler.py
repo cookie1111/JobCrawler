@@ -146,7 +146,7 @@ class PageCrawler:
         df = pd.DataFrame(columns=["URL","id"])
         identity = 0
         for i in range(n):
-            print("depth: ",i," amount: ",len(cur_lvl))
+            print("<",self.url,"> depth: ",i," amount: ",len(cur_lvl))
             for url in cur_lvl:
                 cur, ext, html = self.get_page_urls(url, external, return_html=True)
                 if html is None:

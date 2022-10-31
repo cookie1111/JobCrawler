@@ -14,7 +14,7 @@ DF_FILE = "sites.pkl"
 PAGES_PATH = "pages_ds/"
 
 def create_crawler_and_run_it(url, path):
-    print("working on url")
+    # print("working on url")
     craw = PageCrawler({"url":url})
     Path(path).mkdir(parents=True, exist_ok=True)
     craw.map_website_n_deep_save_html(n=3,path=path)
