@@ -11,6 +11,7 @@ from deep_translator import GoogleTranslator as Translator
 from urllib.parse import urlparse
 from pathlib import Path
 from typing import List, Set, Tuple, Dict
+from os.path import isfile
 
 
 class PageCrawler:
@@ -145,8 +146,11 @@ class PageCrawler:
         overall = set([self.url])
         external = set()
         next_lvl = set()
-        df = pd.DataFrame(columns=["URL","id"])
-        identity = 0
+        if isfile(path+"/df.csv"):
+            pd.read_csv(path+"/df.csv")
+        else:
+            df = pd.DataFrame(columns=["URL","id"])
+        identity = len(df)
         print(self.url, ": ", n)
         for i in range(n):
             print("<",self.url,"> depth: ",i," amount: ",len(cur_lvl))
@@ -159,8 +163,7 @@ class PageCrawler:
                 url = url.replace('/','-')
                 if not Path(path+'/' + url.replace('.', '_') + '.html').is_file():
                     with open(path+'/' + url.replace('.', '_') + '.html', 'wb+') as f:"""
-                # TODO
-                if not Path(path+'/'+str(identity) + '.html').is_file():
+                if not df['URL'].str.contains(url).any():
                     with open(path + '/'+ str(identity) + '.html', 'wb+') as f:
                         df = pd.concat([df, pd.DataFrame([{"URL": url, "id": identity}])])
                         #figure out a naming convention
