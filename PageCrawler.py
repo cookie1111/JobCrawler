@@ -258,6 +258,11 @@ class PageCrawler:
             if return_html:
                 return urls, external_urls_new, None
             return urls, external_urls_new
+        except requests.exceptions.InvalidSchema as e:
+            print(url, ": ", e)
+            if return_html:
+                return urls, external_urls_new, None
+            return urls, external_urls_new
 
         for linkie in soup.findAll('a'):
             href = linkie.attrs.get("href")
@@ -305,4 +310,6 @@ class PageCrawler:
         :return: True if valid url else False
         """
         parse = urlparse(url)
+        if parse.scheme == 'mailto' or parse.scheme == 'tel' or parse.scheme == 'javascript':
+            return False
         return bool(parse.netloc) and bool(parse.scheme)
