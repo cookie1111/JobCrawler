@@ -123,7 +123,8 @@ class PageCrawler:
                 potential_job_external.update(job_external)
         return self.potential_job_pages, potential_job_internal, potential_job_external
 
-    def map_website_n_deep_save_html(self, n: int = 2, max_pages: int = 100, path: str = "/urls") -> None:
+    #TODO need to fix the checking if the page is already added
+    def map_website_n_deep_save_html(self, n: int = 2, max_pages: int = 100, path: str = "/urls", with_external: bool = False) -> None:
         """
         saves html files of all grabbed links from the pages. Iterates over the tree like structure of links and goes to
         nth depth.
@@ -135,6 +136,7 @@ class PageCrawler:
              |          |       |          |               |
         2   page4       page5   page6       page7           page8
 
+        :param with_external: include external links in the crawl
         :param n: amount of layers to map
         :param max_pages: max amount of hrefs in a page to add
         :param path: path to directory to store the pages
@@ -145,6 +147,7 @@ class PageCrawler:
         next_lvl = set()
         df = pd.DataFrame(columns=["URL","id"])
         identity = 0
+        print(self.url, ": ", n)
         for i in range(n):
             print("<",self.url,"> depth: ",i," amount: ",len(cur_lvl))
             for url in cur_lvl:
@@ -156,15 +159,19 @@ class PageCrawler:
                 url = url.replace('/','-')
                 if not Path(path+'/' + url.replace('.', '_') + '.html').is_file():
                     with open(path+'/' + url.replace('.', '_') + '.html', 'wb+') as f:"""
-                if not Path(path+'/'+str(identity) +'.html').is_file():
-                    with open(path + '/'+ str(identity) +'.html', 'wb+') as f:
-                        df = pd.concat([df,pd.DataFrame([{"URL":url,"id":identity}])])
+                # TODO
+                if not Path(path+'/'+str(identity) + '.html').is_file():
+                    with open(path + '/'+ str(identity) + '.html', 'wb+') as f:
+                        df = pd.concat([df, pd.DataFrame([{"URL": url, "id": identity}])])
                         #figure out a naming convention
                         f.write(html)
                         identity = identity + 1
-                    df.to_pickle(path+'/df.pkl')
+                    df.to_csv(path+'/df.csv')
+                if with_external:
+                    cur = cur.union(ext)
                 grabbed = cur.difference(overall)
                 if len(grabbed) > max_pages:
+                    print(self.url,": skipped")
                     sleep(self.timeout_crawler)
                     continue
                 next_lvl = next_lvl.union(cur.difference(overall))
