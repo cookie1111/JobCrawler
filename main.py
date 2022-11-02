@@ -1,6 +1,10 @@
 import math
+import signal
 import sys
 import time
+
+from requests.adapters import HTTPAdapter
+
 from GrowJoAPI import GrowJoAPI
 from PageCrawler import PageCrawler
 from time import sleep
@@ -8,10 +12,19 @@ import pandas as pd
 from os.path import isfile
 from pathlib import Path
 import concurrent.futures as ft
+import requests
+from langdetect.detector_factory import init_factory
 
 TEST = 4
 DF_FILE = "sites.pkl"
 PAGES_PATH = "pages_ds/"
+
+def innit_corpus():
+    global sess
+    sess = requests.Session()
+    sess.mount("http://", HTTPAdapter(max_retries=10))
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
+    init_factory()
 
 def create_crawler_and_run_it(url, path):
     # print("working on url")
@@ -30,7 +43,6 @@ if isfile(DF_FILE):
     df = pd.read_pickle(DF_FILE)
 else:
     df = pd.DataFrame(columns = ['Company_Name', 'URL', 'Career', 'Internal_Potential_Job', 'External_Potential_Job'])
-
 
 
 if __name__ == '__main__':
@@ -106,9 +118,11 @@ if __name__ == '__main__':
                 time.sleep((1000000000-delta)/1000000000)
 
     if TEST == 4:
-        executor = ft.ProcessPoolExecutor(5)
-        futs = [executor.submit(create_crawler_and_run_it, url, PAGES_PATH+url.replace('.', '_')) for url in df.URL.iloc[180:1000]]
+        executor = ft.ProcessPoolExecutor(5,initializer=innit_corpus)
+        futs = [executor.submit(create_crawler_and_run_it, url, PAGES_PATH+url.replace('.', '_')) for url in df.URL.iloc[330:1000]]
         ft.wait(futs)
+        for res in futs[-10:]:
+            print(res.result())
         """for url in df.URL.iloc[160:]:
             print(url,":")
             create_crawler_and_run_it(url,PAGES_PATH + url.replace('.','_'))
