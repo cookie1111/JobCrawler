@@ -46,7 +46,7 @@ class PageCrawler:
             print(self.url, ": ", e)
             return False
         except requests.exceptions.Timeout as e:
-            print(self.url,": ", e)
+            print(self.url, ": ", e)
             return False
         except requests.exceptions.TooManyRedirects as e:
             print(self.url, ": ", e)
@@ -55,6 +55,9 @@ class PageCrawler:
             print(self.url, ": ", e)
             return False
         except requests.exceptions.ConnectionError as e:
+            print(self.url, ": ", e)
+            return False
+        except requests.exceptions.RequestException as e:
             print(self.url, ": ", e)
             return False
 
@@ -158,11 +161,6 @@ class PageCrawler:
                 cur, ext, html = self.get_page_urls(url, external, return_html=True)
                 if html is None:
                     continue
-
-                """url = url.replace('https://','')
-                url = url.replace('/','-')
-                if not Path(path+'/' + url.replace('.', '_') + '.html').is_file():
-                    with open(path+'/' + url.replace('.', '_') + '.html', 'wb+') as f:"""
                 if not df['URL'].str.contains(url).any():
                     with open(path + '/'+ str(identity) + '.html', 'wb+') as f:
                         df = pd.concat([df, pd.DataFrame([{"URL": url, "id": identity}])])
@@ -266,7 +264,11 @@ class PageCrawler:
             if return_html:
                 return urls, external_urls_new, None
             return urls, external_urls_new
-
+        except requests.exceptions.RequestException as e:
+            print(url, ": ", e)
+            if return_html:
+                return urls, external_urls_new, None
+            return urls, external_urls_new
         for linkie in soup.findAll('a'):
             href = linkie.attrs.get("href")
             #invalid linkie

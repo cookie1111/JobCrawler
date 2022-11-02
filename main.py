@@ -17,7 +17,7 @@ def create_crawler_and_run_it(url, path):
     # print("working on url")
     craw = PageCrawler({"url":url})
     Path(path).mkdir(parents=True, exist_ok=True)
-    craw.map_website_n_deep_save_html(n=3,path=path)
+    craw.map_website_n_deep_save_html(n=3,path=path,with_external=False)
 
 with open("usr.txt", 'r') as f:
     lines = f.read().splitlines()
@@ -25,7 +25,7 @@ with open("usr.txt", 'r') as f:
     pwd = lines[1]
 
 #page_crawler = PageCrawler({"url" : "simreka.com"})
-grow_jo = GrowJoAPI(usr, pwd, log = True)
+#grow_jo = GrowJoAPI(usr, pwd, log = True)
 if isfile(DF_FILE):
     df = pd.read_pickle(DF_FILE)
 else:
@@ -107,9 +107,9 @@ if __name__ == '__main__':
 
     if TEST == 4:
         executor = ft.ProcessPoolExecutor(5)
-        futs = [executor.submit(create_crawler_and_run_it, url, PAGES_PATH+url.replace('.', '_')) for url in df.URL.iloc[:10]]
+        futs = [executor.submit(create_crawler_and_run_it, url, PAGES_PATH+url.replace('.', '_')) for url in df.URL.iloc[180:1000]]
         ft.wait(futs)
-        """for url in df.URL:
+        """for url in df.URL.iloc[160:]:
             print(url,":")
             create_crawler_and_run_it(url,PAGES_PATH + url.replace('.','_'))
-            break"""
+        """
