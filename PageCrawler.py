@@ -147,7 +147,7 @@ class PageCrawler:
         external = set()
         next_lvl = set()
         if isfile(path+"/df.csv"):
-            pd.read_csv(path+"/df.csv")
+            df = pd.read_csv(path+"/df.csv")
         else:
             df = pd.DataFrame(columns=["URL","id"])
         identity = len(df)
