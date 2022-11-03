@@ -119,7 +119,7 @@ if __name__ == '__main__':
 
     if TEST == 4:
         executor = ft.ProcessPoolExecutor(5,initializer=innit_corpus)
-        futs = [executor.submit(create_crawler_and_run_it, url, PAGES_PATH+url.replace('.', '_')) for url in df.URL.iloc[330:1000]]
+        futs = [executor.submit(create_crawler_and_run_it, url, PAGES_PATH+url.replace('.', '_')) for url in df.URL.iloc[568:1000]]
         ft.wait(futs)
         for res in futs[-10:]:
             print(res.result())
