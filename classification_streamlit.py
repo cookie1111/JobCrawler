@@ -11,8 +11,10 @@ from page_classification import ClassifyPages
 
 
 def save_and_open_next(df):
-    print(st.session_state['cur_folder'])
-    df.to_csv(str(st.session_state['cur_folder']) + '/df_annotated.csv')
+    print("saving")
+    index = [i['_selectedRowNodeInfo']['nodeRowIndex'] for i in df.selected_rows]
+    df['data'].loc[index,'Job'] = True
+    df['data'].to_csv(str(st.session_state['cur_folder']) + '/df_annotated.csv')
     st.session_state['cur_folder'] = next(st.session_state['iterator'])
 
 
@@ -25,16 +27,18 @@ def main():
         st.session_state['cur_folder'] = next(st.session_state['classifier'])
 
     df = st.session_state['classifier'].using_agGrid(st.session_state['classifier'].prep_classification(st.session_state['cur_folder']))
-    #print(df)
+    #print(df.selected_rows)
     with st.sidebar:
         st.text(st.session_state["cur_folder"])
         next_button = st.button(
             label='Next',
-            #on_click=save_and_open_next,
-            #args=df['data']
+            on_click=save_and_open_next,
+            args = [df]
+
         )
-    if next_button:
-        save_and_open_next(df['data'])
+    #if next_button:
+        #save_and_open_next(df)
+        #next_button = False
         #print(st.session_state)
 
 if __name__ == "__main__":
