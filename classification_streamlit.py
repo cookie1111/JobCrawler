@@ -10,7 +10,11 @@ from page_classification import ClassifyPages
 
 
 
-def save_and_open_next(df):
+def save_and_open_next(df,save=True):
+    if not save:
+        print("skipping")
+        st.session_state['cur_folder'] = next(st.session_state['iterator'])
+        st.experimental_rerun()
     print("saving")
     index = [i['_selectedRowNodeInfo']['nodeRowIndex'] for i in df.selected_rows]
     df['data'].loc[index,'Job'] = True
@@ -26,7 +30,17 @@ def main():
         st.session_state['iterator'] = iter(st.session_state['classifier'])
         st.session_state['cur_folder'] = next(st.session_state['classifier'])
 
-    df = st.session_state['classifier'].using_agGrid(st.session_state['classifier'].prep_classification(st.session_state['cur_folder']))
+    if st.session_state['classifier'].check_annotated(st.session_state['cur_folder']):
+        save_and_open_next(None,False)
+
+    try:
+        df = st.session_state['classifier'].prep_classification(st.session_state['cur_folder'])
+    except IndexError as e:
+        print(f"IndexError for {st.session_state['cur_folder']}")
+        save_and_open_next(None,False)
+
+
+    df = st.session_state['classifier'].using_agGrid(df)
     #print(df.selected_rows)
     with st.sidebar:
         st.text(st.session_state["cur_folder"])

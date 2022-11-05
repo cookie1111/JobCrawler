@@ -30,6 +30,10 @@ class ClassifyPages:
             self.key_words = self.key_words + t.translate_batch(words_en)
         return self.key_words
 
+    def check_annotated(self, folder_path):
+        folder_path = Path(str(folder_path)+"/df_annotated.csv")
+        return folder_path.exists()
+
     def get_folder_df(self, folder_path):
         folder_path = Path(folder_path)
         return pd.read_csv(list(folder_path.glob('df.csv'))[0])
