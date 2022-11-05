@@ -2,7 +2,7 @@ from pathlib import Path
 import pandas as pd
 from deep_translator import GoogleTranslator as Translator
 import streamlit as st
-from st_aggrid import AgGrid,ColumnsAutoSizeMode
+from st_aggrid import AgGrid,ColumnsAutoSizeMode, GridOptionsBuilder
 import st_aggrid
 
 
@@ -47,7 +47,11 @@ class ClassifyPages:
             return df
 
     def using_agGrid(self, df,fit = True):
-        grid_return = AgGrid(df, editable=True,columns_auto_size_mode=ColumnsAutoSizeMode(2))
+        options = GridOptionsBuilder.from_dataframe(df)
+        options.configure_selection(selection_mode='multiple',use_checkbox=True)
+        ops = options.build()
+
+        grid_return = AgGrid(df, editable=True,columns_auto_size_mode=ColumnsAutoSizeMode(2),gridOptions=ops)
         return grid_return
 
     # last resort
