@@ -158,7 +158,7 @@ class PageCrawler:
         for i in range(n):
             print("<",self.url,"> depth: ",i," amount: ",len(cur_lvl))
             for url in cur_lvl:
-                cur, ext, html = self.get_page_urls(url, external, return_html=True)
+                cur, ext, html = self.get_page_urls_no_internals(url, external, return_html=True)
                 if html is None:
                     continue
                 if not df['URL'].str.contains(url).any():
@@ -216,6 +216,90 @@ class PageCrawler:
     # possible alternative
     def find_career_button(self):
         pass
+
+
+    def get_page_urls_no_internals(self, url: str, external_urls: Set[str], return_html: bool = False) -> Tuple[Set[str], Set[str], object]:
+        """
+        return all the hrefs found in the page seperated external and internals and the content of the html page. Tuple is
+        of variable size depending on if return_html is True or not
+
+        :param url: page to scan for hrefs through
+        :param external_urls: previously found external urls stored in Set
+        :param return_html: weather to return the html of the page or not
+        :return: internal urls, external urls, if return_html : page content
+        """
+        urls = set()
+        external_urls_new = set()
+        domain = urlparse(url).netloc
+        try:
+            re = requests.get(url, timeout=4)
+            soup = BeautifulSoup(re.content, "html.parser")
+        except requests.exceptions.Timeout as e:
+            print(url, ": ", e)
+            self.timeout_crawler = self.timeout_crawler + 0.05
+            if return_html:
+                return urls, external_urls_new, None
+            return urls, external_urls_new
+        except requests.exceptions.HTTPError as e:
+            print(url, ": ", e)
+            if return_html:
+                return urls, external_urls_new, None
+            return urls, external_urls_new
+        except requests.exceptions.TooManyRedirects as e:
+            print(url, ": ", e)
+            if return_html:
+                return urls, external_urls_new, None
+            return urls, external_urls_new
+        except requests.exceptions.SSLError as e:
+            print(url, ": ", e)
+            if return_html:
+                return urls, external_urls_new, None
+            return urls, external_urls_new
+        except requests.exceptions.ConnectionError as e:
+            print(url, ": ", e)
+            if return_html:
+                return urls, external_urls_new, None
+            return urls, external_urls_new
+        except requests.exceptions.InvalidSchema as e:
+            print(url, ": ", e)
+            if return_html:
+                return urls, external_urls_new, None
+            return urls, external_urls_new
+        except requests.exceptions.RequestException as e:
+            print(url, ": ", e)
+            if return_html:
+                return urls, external_urls_new, None
+            return urls, external_urls_new
+        for linkie in soup.findAll('a'):
+            href = linkie.attrs.get("href")
+            #invalid linkie
+            if href == "" or href is None:
+                continue
+
+            href = urljoin(url, href)
+
+            parse_href = urlparse(href)
+            href = parse_href.scheme + "://" + parse_href.netloc + parse_href.path
+            try:
+                if not self._check_is_valid_url(href) or href in self.urls_internal:
+                    continue
+            except ValueError as e:
+                print(href, ": ", e)
+                continue
+            if domain not in href:
+                if href not in external_urls:
+                    external_urls_new.add(href)
+                continue
+
+            #self.urls_internal.add(href)
+            #print(href)
+            #self.urls_queue.put(href)
+            urls.add(href)
+        if return_html:
+            return urls,external_urls_new, re.content
+        return urls, external_urls_new
+
+
 
     def get_page_urls(self, url: str, external_urls: Set[str], return_html: bool = False) -> Tuple[Set[str], Set[str], object]:
         """

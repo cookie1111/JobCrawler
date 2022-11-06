@@ -30,7 +30,7 @@ def create_crawler_and_run_it(url, path):
     # print("working on url")
     craw = PageCrawler({"url":url})
     Path(path).mkdir(parents=True, exist_ok=True)
-    craw.map_website_n_deep_save_html(n=3,path=path,with_external=False)
+    craw.map_website_n_deep_save_html(n=3,path=path,with_external=True)
 
 with open("usr.txt", 'r') as f:
     lines = f.read().splitlines()
@@ -119,7 +119,7 @@ if __name__ == '__main__':
 
     if TEST == 4:
         executor = ft.ProcessPoolExecutor(5,initializer=innit_corpus)
-        futs = [executor.submit(create_crawler_and_run_it, url, PAGES_PATH+url.replace('.', '_')) for url in df.URL.iloc[568:1000]]
+        futs = [executor.submit(create_crawler_and_run_it, url, PAGES_PATH+url.replace('.', '_')) for url in df.URL.iloc[:1000]]
         ft.wait(futs)
         for res in futs[-10:]:
             print(res.result())
