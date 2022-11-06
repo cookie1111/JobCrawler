@@ -16,7 +16,8 @@ def save_and_open_next(df,save=True):
         st.session_state['cur_folder'] = next(st.session_state['iterator'])
         st.experimental_rerun()
     print("saving")
-    index = [i['_selectedRowNodeInfo']['nodeRowIndex'] for i in df.selected_rows]
+    index = [int(i['_selectedRowNodeInfo']['nodeId']) for i in df.selected_rows]
+    print(index)
     df['data'].loc[index,'Job'] = [not x for x in df['data'].loc[index,'Job']]
     df['data'].to_csv(str(st.session_state['cur_folder']) + '/df_annotated.csv')
     st.session_state['cur_folder'] = next(st.session_state['iterator'])
