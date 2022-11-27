@@ -158,10 +158,10 @@ class PageCrawler:
         for i in range(n):
             print("<",self.url,"> depth: ",i," amount: ",len(cur_lvl))
             for url in cur_lvl:
-                cur, ext, html = self.get_page_urls_no_internals(url, external, return_html=True)
+                cur, ext, html = self.get_page_urls_no_internals(url, external, return_html=True, max_no=max_pages+len(overall))
                 if html is None:
                     continue
-                if not df['URL'].str.contains(url).any():
+                if not df['URL'].str.contains(url, regex=False).any():
                     with open(path + '/'+ str(identity) + '.html', 'wb+') as f:
                         df = pd.concat([df, pd.DataFrame([{"URL": url, "id": identity}])])
                         #figure out a naming convention
@@ -217,12 +217,14 @@ class PageCrawler:
     def find_career_button(self):
         pass
 
-
-    def get_page_urls_no_internals(self, url: str, external_urls: Set[str], return_html: bool = False) -> Tuple[Set[str], Set[str], object]:
+    def get_page_urls_no_internals(self, url: str, external_urls: Set[str], return_html: bool = False, max_no: int = 100,
+                                   key_words: List[str] = ['twitter', 'linkedin', 'instagram', 'facebook', 'github','youtube','xing','twitch']) -> Tuple[Set[str], Set[str], object]:
         """
         return all the hrefs found in the page seperated external and internals and the content of the html page. Tuple is
         of variable size depending on if return_html is True or not
 
+        :param key_words: words to avoid like social media
+        :param max_no: max number of hrefs grabbed
         :param url: page to scan for hrefs through
         :param external_urls: previously found external urls stored in Set
         :param return_html: weather to return the html of the page or not
@@ -270,6 +272,7 @@ class PageCrawler:
             if return_html:
                 return urls, external_urls_new, None
             return urls, external_urls_new
+
         for linkie in soup.findAll('a'):
             href = linkie.attrs.get("href")
             #invalid linkie
@@ -286,6 +289,10 @@ class PageCrawler:
             except ValueError as e:
                 print(href, ": ", e)
                 continue
+
+            if self._check_keywords(href,key_words):
+                continue
+
             if domain not in href:
                 if href not in external_urls:
                     external_urls_new.add(href)
@@ -295,11 +302,21 @@ class PageCrawler:
             #print(href)
             #self.urls_queue.put(href)
             urls.add(href)
+            if len(urls)+len(external_urls) > max_no:
+                # skipped
+                print(f"Partially skipping {url}")
+                if return_html:
+                    return urls, external_urls_new, re.content
+                return urls, external_urls_new
         if return_html:
             return urls,external_urls_new, re.content
         return urls, external_urls_new
 
-
+    def _check_keywords(self,href,keywords):
+        for key in keywords:
+            if key in href:
+                return True
+        return False
 
     def get_page_urls(self, url: str, external_urls: Set[str], return_html: bool = False) -> Tuple[Set[str], Set[str], object]:
         """

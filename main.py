@@ -4,6 +4,7 @@ import sys
 import time
 
 from requests.adapters import HTTPAdapter
+from guppy import hpy; h = hpy()
 
 from GrowJoAPI import GrowJoAPI
 from PageCrawler import PageCrawler
@@ -18,6 +19,10 @@ from langdetect.detector_factory import init_factory
 TEST = 4
 DF_FILE = "sites.pkl"
 PAGES_PATH = "pages_ds/"
+
+# implement: https://stackoverflow.com/questions/53493973/how-to-pause-processes-in-case-they-are-consuming-too-much-memory
+# https://stackoverflow.com/questions/20776189/concurrent-futures-vs-multiprocessing-in-python-3
+# to help with RAM management
 
 def innit_corpus():
     global sess
@@ -119,9 +124,17 @@ if __name__ == '__main__':
 
     if TEST == 4:
         executor = ft.ProcessPoolExecutor(5,initializer=innit_corpus)
-        futs = [executor.submit(create_crawler_and_run_it, url, PAGES_PATH+url.replace('.', '_')) for url in df.URL.iloc[:1000]]
-        ft.wait(futs)
-        for res in futs[-10:]:
+        start = 180
+        cnt = 1000
+        with ft.ProcessPoolExecutor(5,initializer=innit_corpus) as executor:
+            while start<cnt:
+                futs = [executor.submit(create_crawler_and_run_it, url, PAGES_PATH+url.replace('.', '_')) for url in df.URL.iloc[start:start+5]]
+                ft.wait(futs)
+                print(h.heap())
+                start = start + 5
+        #futs = [executor.submit(create_crawler_and_run_it, url, PAGES_PATH+url.replace('.', '_')) for url in df.URL.iloc[140:1000]]
+        #ft.wait(futs)
+        for res in futs:
             print(res.result())
         """for url in df.URL.iloc[160:]:
             print(url,":")
