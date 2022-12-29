@@ -67,7 +67,8 @@ class GrowJoAPI:
             if "auth" in request.headers:
                 auth = request.headers["auth"]
                 authorization = request.headers["authorization"]
-
+        if self.log:
+            print(auth, authorization)
         return auth, authorization
 
     def set_country(self, country: str) -> None:
@@ -135,7 +136,7 @@ class GrowJoAPI:
                 filter = filter[:-1]
             return f"filter={{{filter}}}"
         else:
-            return None
+            return "filter={}"
 
     def get_companies(self, page: int = 0, rows: int = 50) -> Tuple[List[Dict], int]:
         """

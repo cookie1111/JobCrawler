@@ -16,7 +16,7 @@ import concurrent.futures as ft
 import requests
 from langdetect.detector_factory import init_factory
 
-TEST = 4
+TEST = 1
 DF_FILE = "sites.pkl"
 PAGES_PATH = "pages_ds/"
 
@@ -41,6 +41,7 @@ with open("usr.txt", 'r') as f:
     lines = f.read().splitlines()
     usr = lines[0]
     pwd = lines[1]
+    print(usr,pwd)
 
 #page_crawler = PageCrawler({"url" : "simreka.com"})
 #grow_jo = GrowJoAPI(usr, pwd, log = True)
@@ -58,6 +59,7 @@ if __name__ == '__main__':
         #print(page_crawler.map_website())
 
     if TEST == 1:
+        grow_jo = GrowJoAPI(usr=usr, pwd=pwd, log=True)
         # GrowJo tests
         # empty
         grow_jo.set_city("")
@@ -124,14 +126,15 @@ if __name__ == '__main__':
 
     if TEST == 4:
         executor = ft.ProcessPoolExecutor(5,initializer=innit_corpus)
-        start = 180
+        start = 0
         cnt = 1000
         with ft.ProcessPoolExecutor(5,initializer=innit_corpus) as executor:
             while start<cnt:
                 futs = [executor.submit(create_crawler_and_run_it, url, PAGES_PATH+url.replace('.', '_')) for url in df.URL.iloc[start:start+5]]
                 ft.wait(futs)
-                print(h.heap())
+                #print(h.heap())
                 start = start + 5
+                print(start)
         #futs = [executor.submit(create_crawler_and_run_it, url, PAGES_PATH+url.replace('.', '_')) for url in df.URL.iloc[140:1000]]
         #ft.wait(futs)
         for res in futs:
