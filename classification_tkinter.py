@@ -5,7 +5,11 @@ from tkinterweb import HtmlFrame
 import os
 
 # Set the path to the folder containing the HTML files
-folder_path = "C:\\Users\\Sebastjan\\PycharmProjects\\JobCrawler\\pages_ds\\2txt_de"
+folder_path = "C:\\Users\\Sebastjan\\PycharmProjects\\JobCrawler\\pages_ds"
+folders = [f for f in os.listdir(folder_path)]
+folder = folders.pop(0)
+files = [f for f in os.listdir(os.path.join(folder_path,folder))]
+current_file = files.pop()
 
 # Create an empty dataframe to store the classification results
 df = pd.DataFrame(columns=['File', 'Class'])
@@ -32,22 +36,26 @@ def classify( event=None, btn = None):
 
 # Define a function to display the contents of the next HTML file
 def show_next_file():
+    global folder_path
     global current_file
-    # Get the list of HTML files in the folder
-    files = [f for f in os.listdir(folder_path) if f.endswith('.html')]
+    global folder
+    global folders
+    global files
     # If there are no more files, close the window and show the dataframe
     if len(files) == 0:
-        root.destroy()
-        print(df)
-        return
+        if len(folders) == 0:
+            root.destroy()
+            print(df)
+            return
+        else:
+            folder = folders.pop(0)
+            files = [f for f in os.listdir(os.path.join(folder_path,folder))]
     # Get the next file in the list
-    current_file = files[0]
+    current_file = files.pop(0)
     # Display the file in the web browser widget
-    file_url = 'file://' + os.path.join(folder_path, current_file)
+    file_url = 'file://' + os.path.join(os.path.join(folder_path,folder), current_file)
     frame.load_file(file_url)
     root.focus()
-    # Remove the file from the list
-    files.pop(0)
 
 frame = HtmlFrame(root)
 frame.pack()
