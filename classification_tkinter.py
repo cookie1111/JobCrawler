@@ -1,6 +1,7 @@
 import tkinter as tk
 import pandas as pd
-import webbrowser
+import webview
+from tkinterweb import HtmlFrame
 import os
 
 # Set the path to the folder containing the HTML files
@@ -43,14 +44,13 @@ def show_next_file():
     current_file = files[0]
     # Display the file in the web browser widget
     file_url = 'file://' + os.path.join(folder_path, current_file)
-    browser.open(file_url)
+    frame.load_file(file_url)
+    root.focus()
     # Remove the file from the list
     files.pop(0)
 
-firefox_path = "C:\\Program Files\\Mozilla Firefox\\firefox"
-# Create a web browser widget to render the HTML file
-webbrowser.register(name='firefox',klass=None,instance=webbrowser.BackgroundBrowser(firefox_path))
-browser = webbrowser.get('firefox')
+frame = HtmlFrame(root)
+frame.pack()
 
 # Create buttons to classify the file as belonging to either class
 button1 = tk.Button(root, text='Class 1', command=lambda: classify(btn='1'))
