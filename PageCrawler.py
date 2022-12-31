@@ -41,23 +41,30 @@ class PageCrawler:
         try:
             response = requests.get(self.url,timeout=3)
             response.raise_for_status()
+            response.close()
             return True
         except requests.exceptions.HTTPError as e:
+            response.close()
             print(self.url, ": ", e)
             return False
         except requests.exceptions.Timeout as e:
+            response.close()
             print(self.url, ": ", e)
             return False
         except requests.exceptions.TooManyRedirects as e:
+            response.close()
             print(self.url, ": ", e)
             return False
         except requests.exceptions.SSLError as e:
+            response.close()
             print(self.url, ": ", e)
             return False
         except requests.exceptions.ConnectionError as e:
+            response.close()
             print(self.url, ": ", e)
             return False
         except requests.exceptions.RequestException as e:
+            response.close()
             print(self.url, ": ", e)
             return False
 
@@ -236,6 +243,7 @@ class PageCrawler:
         try:
             re = requests.get(url, timeout=4)
             soup = BeautifulSoup(re.content, "html.parser")
+            re.close()
         except requests.exceptions.Timeout as e:
             print(url, ": ", e)
             self.timeout_crawler = self.timeout_crawler + 0.05
@@ -334,6 +342,7 @@ class PageCrawler:
         try:
             re = requests.get(url, timeout=4)
             soup = BeautifulSoup(re.content, "html.parser")
+            re.close()
         except requests.exceptions.Timeout as e:
             print(url, ": ", e)
             self.timeout_crawler = self.timeout_crawler + 0.05

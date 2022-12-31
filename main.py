@@ -16,7 +16,7 @@ import concurrent.futures as ft
 import requests
 from langdetect.detector_factory import init_factory
 
-TEST = 1
+TEST = 4
 DF_FILE = "sites.pkl"
 PAGES_PATH = "pages_ds/"
 
@@ -52,6 +52,7 @@ else:
 
 
 if __name__ == '__main__':
+    grow_jo = GrowJoAPI(usr=usr, pwd=pwd, log=True)
     if TEST == 0:
     # crawler tests
         pass
@@ -59,7 +60,7 @@ if __name__ == '__main__':
         #print(page_crawler.map_website())
 
     if TEST == 1:
-        grow_jo = GrowJoAPI(usr=usr, pwd=pwd, log=True)
+
         # GrowJo tests
         # empty
         grow_jo.set_city("")
@@ -126,10 +127,11 @@ if __name__ == '__main__':
 
     if TEST == 4:
         executor = ft.ProcessPoolExecutor(5,initializer=innit_corpus)
-        start = 0
+        start = 920
         cnt = 1000
         with ft.ProcessPoolExecutor(5,initializer=innit_corpus) as executor:
             while start<cnt:
+                #print(df.shape)
                 futs = [executor.submit(create_crawler_and_run_it, url, PAGES_PATH+url.replace('.', '_')) for url in df.URL.iloc[start:start+5]]
                 ft.wait(futs)
                 #print(h.heap())
