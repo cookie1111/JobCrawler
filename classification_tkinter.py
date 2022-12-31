@@ -10,6 +10,8 @@ folders = [f for f in os.listdir(folder_path)]
 folder = folders.pop(0)
 files = [f for f in os.listdir(os.path.join(folder_path,folder))]
 current_file = files.pop()
+current_df = pd.read_csv(os.path.join(os.path.join(folder_path,folder),"df.csv"))
+row_idx = 0
 
 # Create an empty dataframe to store the classification results
 df = pd.DataFrame(columns=['File', 'Class'])
@@ -41,6 +43,8 @@ def show_next_file():
     global folder
     global folders
     global files
+    global current_df
+    global row_idx
     # If there are no more files, close the window and show the dataframe
     if len(files) == 0:
         if len(folders) == 0:
@@ -49,13 +53,18 @@ def show_next_file():
             return
         else:
             folder = folders.pop(0)
-            files = [f for f in os.listdir(os.path.join(folder_path,folder))]
+            files = [f for f in os.listdir(os.path.join(folder_path,folder)) if f.endswith('.html')]
+            current_df = pd.read_csv(os.path.join(os.path.join(folder_path,folder),"df.csv"))
+            row_idx = 0
+
     # Get the next file in the list
     current_file = files.pop(0)
     # Display the file in the web browser widget
     file_url = 'file://' + os.path.join(os.path.join(folder_path,folder), current_file)
     frame.load_file(file_url)
     root.focus()
+    root.title(f"{current_df.iloc[row_idx]['URL']} file:{current_file}")
+    row_idx = row_idx+1
 
 frame = HtmlFrame(root)
 frame.pack()
