@@ -20,10 +20,6 @@ TEST = 4
 DF_FILE = "sites.pkl"
 PAGES_PATH = "pages_ds/"
 
-# implement: https://stackoverflow.com/questions/53493973/how-to-pause-processes-in-case-they-are-consuming-too-much-memory
-# https://stackoverflow.com/questions/20776189/concurrent-futures-vs-multiprocessing-in-python-3
-# to help with RAM management
-
 def innit_corpus():
     global sess
     sess = requests.Session()
@@ -119,7 +115,9 @@ if __name__ == '__main__':
                     if pc.dead_link:
                         continue
                     career, internal_jobs, external_jobs = pc.map_first_page_only()
-                    df = df.append({'Company_Name': company['company_name'], 'URL': company['url'], 'Career': list(career), 'Internal_Potential_Job' : list(internal_jobs), 'External_Potential_Job' : list(external_jobs)}, ignore_index=True)
+                    df = df.append({'Company_Name': company['company_name'], 'URL': company['url'],
+                                    'Career': list(career), 'Internal_Potential_Job' : list(internal_jobs),
+                                    'External_Potential_Job' : list(external_jobs)}, ignore_index=True)
                     df.to_pickle(DF_FILE)
             delta = time.process_time_ns() -start
             if delta < 1000000000:
@@ -132,7 +130,8 @@ if __name__ == '__main__':
         with ft.ProcessPoolExecutor(5,initializer=innit_corpus) as executor:
             while start<cnt:
                 #print(df.shape)
-                futs = [executor.submit(create_crawler_and_run_it, url, PAGES_PATH+url.replace('.', '_')) for url in df.URL.iloc[start:start+5]]
+                futs = [executor.submit(create_crawler_and_run_it,
+                                        url, PAGES_PATH+url.replace('.', '_')) for url in df.URL.iloc[start:start+5]]
                 ft.wait(futs)
                 #print(h.heap())
                 start = start + 5

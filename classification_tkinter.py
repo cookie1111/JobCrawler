@@ -3,7 +3,7 @@ import pandas as pd
 import webview
 from tkinterweb import HtmlFrame
 import os
-
+df_class_name = "overall_df.csv"
 # Set the path to the folder containing the HTML files
 folder_path = "C:\\Users\\Sebastjan\\PycharmProjects\\JobCrawler\\pages_ds"
 folders = [f for f in os.listdir(folder_path)]
@@ -14,7 +14,10 @@ current_df = pd.read_csv(os.path.join(os.path.join(folder_path,folder),"df.csv")
 row_idx = 0
 
 # Create an empty dataframe to store the classification results
-df = pd.DataFrame(columns=['File', 'Class'])
+if os.path.exists(os.path.join(folder_path, df_class_name)):
+    df = pd.read_csv(os.path.join(folder_path, df_class_name))
+else:
+    df = pd.DataFrame(columns=['File', 'Class'])
 
 # Create the main window
 root = tk.Tk()
@@ -24,6 +27,8 @@ root.wm_attributes('-topmost', True)
 # Define a function to classify the current HTML file
 def classify( event=None, btn = None):
     global df
+    global current_file
+    global folder
     # Get the classification from the button that was pressed
     if btn is None:
         classification = event.char
@@ -31,7 +36,7 @@ def classify( event=None, btn = None):
         classification = btn
     print(classification)
     # Add the file name and classification to the dataframe
-    df = df.append({'File': current_file, 'Class': classification}, ignore_index=True)
+    df = df.append({'File': os.path.join(folder, current_file), 'Class': classification}, ignore_index=True)
     # Clear the web browser widget and move to the next file
     #browser.reload()
     show_next_file()
@@ -45,6 +50,7 @@ def show_next_file():
     global files
     global current_df
     global row_idx
+    global df
     # If there are no more files, close the window and show the dataframe
     if len(files) == 0:
         if len(folders) == 0:
@@ -59,11 +65,16 @@ def show_next_file():
 
     # Get the next file in the list
     current_file = files.pop(0)
+    if os.path.join(folder, current_file) in df["File"].values:
+        row_idx = row_idx + 1
+        show_next_file()
+
     # Display the file in the web browser widget
     file_url = 'file://' + os.path.join(os.path.join(folder_path,folder), current_file)
     frame.load_file(file_url)
     root.focus()
     root.title(f"{current_df.iloc[row_idx]['URL']} file:{current_file}")
+    df.to_csv(os.path.join(folder_path, df_class_name))
     row_idx = row_idx+1
 
 frame = HtmlFrame(root)
