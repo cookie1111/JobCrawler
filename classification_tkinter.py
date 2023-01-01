@@ -59,8 +59,8 @@ def show_next_file():
             return
         else:
             folder = folders.pop(0)
-            files = [f for f in os.listdir(os.path.join(folder_path,folder)) if f.endswith('.html')]
             current_df = pd.read_csv(os.path.join(os.path.join(folder_path,folder),"df.csv"))
+            files = [f"{i}.html"for i in range(len(current_df))]
             row_idx = 0
 
     # Get the next file in the list
